@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <div class="game">
+        <div class="game-board">
+            <div data-bind="foreach: allBoxs">
+                <div class="board-row" data-bind="foreach: $data">
+                    <button class="square" data-bind="click: $root.down.bind($root,$data), text: $data.value"></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-info" data-reactid=".0.1">
+            <div>Next player: <i data-bind="text: isBlack()?'X':'O'"></i></div>
+            <a href="#" data-bind="click: $root.goBack.bind($root,$data)">Go Back</a>
+        </div>
+    </div>
+
+    <script src="./knockout-3.4.2.js"></script>
+    <script src="./script.js"></script>
+</body>
+</html>
