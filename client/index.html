@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+    <div id="login" style="left: 499.5px; top: 100px;" data-bind="visible: !isLogin()">
+        <h1>登陆</h1>
+        <div class="box">
+            <input type="text" id="nickname" maxlength="10" class="in" data-bind="value: nickName">
+            <input type="button" class="go" value="加入游戏" data-bind="click: login">
+        </div>
+    </div>
+
+    <div id="main">
+        <div data-bind="visible: hasRoom()" id="room" class="room">
+            <div class="room_user">
+                <div class="u1">
+                    <p id="room-p1-img"><img src="./imgs/no_player.gif"></p>
+                    <p id="room-p1-nickname"></p>
+                    <p id="room-p1-status"></p>
+                </div>
+                <div class="u2">
+                    <p id="room-p2-nickname"></p>
+                    <p id="room-p2-status"></p>
+                    <p id="room-p2-img"><img src="./imgs/no_player.gif"></p>
+                </div>
+            </div>
+            <div class="room_chess" data-bind="click: $root.click, style:{cursor: isMeDown()?'':cursor}">
+
+            </div>
+            <div class="room_message">
+                <div class="room_button">
+                    <input type="button" class="btn" value="准备" data-bind="click: ready">
+                    <input type="button" class="btn" value="退出" data-bind="click: leaveRoom">
+                </div>
+                <div id="room-msg-content" class="content"></div>
+                <div class="input">
+                    <input id="room-msg-input" style="width:175px;margin:5px 0 0 8px" type="text">
+                    <input id="room-msg-button" style="width:50px;margin:5px 0 0 0" type="button" value="发送">
+                </div>
+            </div>
+        </div>
+
+        <div id="room_list" class="room_all" data-bind="if: isLogin() && !hasRoom()">
+            <div class="room_left" data-bind="foreach: roomList">
+                <div class="room_item">
+                    <div class="player2"></div>
+                    <div class="players" data-bind="foreach: players">
+                        <div class="player no" data-bind="click: $root.joinRoom.bind($root,$parent,$index())"></div>
+                    </div>
+                    <div class="player1"></div>
+                    <div class="roomnum">- <!-- ko text: $data.id == 0 ? 1 : $data.id+1 --><!-- /ko --> -</div>
+                </div>
+            </div>
+            <div class="room_right">
+                <div id="list-box" class="list">
+                    <li id="user-4O3pjrDHB95DTFS2AAAE"><span>无状态</span>123</li>
+                </div>
+                <div class="message">
+                    <div id="msg-content" class="content"></div>
+                    <div class="input">
+                        <select style="width:50px;margin:5px 0 0 8px"><option value="">所有人</option></select>
+                        <input id="msg-input" style="width:125px;margin:5px 0 0 0" type="text">
+                        <input id="msg-button" style="width:50px;margin:5px 0 0 0" type="button" value="发送">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="http://127.0.0.1:8080/socket.io/socket.io.js"></script>
+    <script src="./knockout-3.4.2.js"></script>
+    <script src="./room.js"></script>
+    <script src="./player.js"></script>
+    <script src="./script.js"></script>
+</body>
+
+</html>
