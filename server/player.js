@@ -6,11 +6,12 @@ module.exports = class Player {
         this.status = 0;    // 0 大厅 1 房间 2 准备 3 游戏中
         this.post = null;
         this.sid = this.socket.id;
+        this.index = opt.index
     }
 
     joinRoom(room, post) {
         room.players[post] = this;
-        room.generatorList();
+        // room.generatorList();
 
         this.post = post;
         this.room = room;
@@ -18,7 +19,8 @@ module.exports = class Player {
     }
 
     leaveRoom() {
-        this.room.players.splice(this.post, 1);
+        this.room.players.splice(this.post, 1, null);
+        this.room = null
         this.post = null;
         this.status = 0;
     }
@@ -27,13 +29,17 @@ module.exports = class Player {
         this.status = 2;
     }
 
-    getInfo() {
+    getUserInfo() {
         return {
             nickName: this.nickName,
-            room: this.room === null ? null : this.room.getInfo(),
             status: this.status,
             post: this.post,
-            sid: this.sid
+            sid: this.sid,
+            index: this.index
         }
+    }
+
+    getUserRoom() {
+        return this.room.getRoomInfo();
     }
 }

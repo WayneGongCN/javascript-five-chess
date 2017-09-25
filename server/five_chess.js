@@ -1,12 +1,9 @@
 const Room = require('./room');
 const Player = require('./player');
-
 const io = require('socket.io')();
 
 module.exports = class FiveChess {
     constructor(cfg) {
-        this._instanc;
-
         this.config = {
             roomTotal: cfg.roomTotal || 100,
             listenPort: cfg.listenPort || 8080,
@@ -14,14 +11,12 @@ module.exports = class FiveChess {
         };
 
         this.roomList;
-        this.playerList;
+        this.playerList = [];
 
         this.init();
     }
 
     init() {
-        this.playerList = [];
-
         this.initRoomList();
         this.initSocket();
     }
@@ -31,7 +26,7 @@ module.exports = class FiveChess {
             .fill(null)
             .map((item, index) => {
                 return new Room(index);
-            })
+            });
     }
 
     initSocket() {
@@ -85,16 +80,11 @@ module.exports = class FiveChess {
 
     onClose(data, socket) {
         let sid = socket.id;
-        let index;
-        this.playerList.forEach((item, i) => {
-            if (item.sid === sid) {
-                index = i;
-            }
-        });
-        if (index != undefined) {
-            let player = this.playerList[index];
+        let player = this.getPlayerBySid(sid);
+        if (player && player.room !== null) {
             player.leaveRoom();
-            this.playerList.splice(index, 1);
+        } else if (player) {
+            this.playerList.splice(player.index, 1);
         }
     }
 
@@ -105,34 +95,40 @@ module.exports = class FiveChess {
         if (players.length > this.config.maxClientNum) {
             socket.emit('error', { msg: '超过在线人数' })
         } else {
+            let len = this.playerList.length;
             let newPlayer = new Player({
                 nickName: data.nickName,
-                socket: socket
+                socket: socket,
+                index: len
             });
             players.push(newPlayer);
-            io.sockets.emit('join', {
-                player: newPlayer.getInfo()
-            });
-
+            
             socket.emit('login', {
-                player: newPlayer.getInfo(),
-                roomList: new Array(100)
+                playerList: players.map(x => x.getUserInfo()),
+                roomList: this.roomList.map(x => x.getRoomInfo())
+            });
+            io.sockets.emit('join', {
+                player: newPlayer.getUserInfo()
             });
         }
     }
 
     onJoinRoom(data, socket) {
         let sid = socket.id;
-        let roomId = data.roomId;
-        let room = this.roomList[roomId];
+        let room = this.roomList[data.roomId];
         let post = data.post;
         let player = this.getPlayerBySid(sid);
 
         if (room.players[post] === null) {
             player.joinRoom(room, post);
-            socket.emit('joinRoom', room.getInfo())
+
+            socket.emit('joinRoom', {
+                post: post,
+                room: room.getRoomInfo()
+            });
+
             io.sockets.emit('join', {
-                room: room.getInfo()
+                room: room.getRoomInfo()
             })
         }
     }
@@ -141,13 +137,12 @@ module.exports = class FiveChess {
         let sid = socket.id;
         let player = this.getPlayerBySid(sid);
 
-        player.leaveRoom();
         io.sockets.emit('leaveRoom', {
-            player: player.getInfo(),
-            room: player.room.getInfo()
+            player: player.sid,
+            room: player.room.roomId
         });
 
-        player.room = null;
+        player.leaveRoom();
     }
 
     onReady(data, socket) {
@@ -157,9 +152,16 @@ module.exports = class FiveChess {
         PR.player.ready();
         PR.room.players.forEach(x => {
             if (x) {
-                x.socket.emit('ready', PR.player.getInfo())
+                x.socket.emit('ready', {
+                    player: x.post
+                })
             }
         });
+
+        if (PR.room.players[0].status === PR.room.players[1].status === 2) {
+            PR.room.isPlaying = true;
+            socket.emit('start');
+        }
     }
 
     onMessage(data, socket) {

@@ -54,10 +54,14 @@
                 <div class="room_item">
                     <div class="player2"></div>
                     <div class="players" data-bind="foreach: players">
-                        <div class="player no" data-bind="click: $root.joinRoom.bind($root,$parent,$index())"></div>
+                        <div class="player no" data-bind="click: $root.joinRoom.bind($root,$parent,$index())">
+                            <!-- ko if: $data != null -->
+                                <i data-bind="text: nickName()"></i>
+                            <!-- /ko -->
+                        </div>
                     </div>
                     <div class="player1"></div>
-                    <div class="roomnum">- <!-- ko text: $data.id == 0 ? 1 : $data.id+1 --><!-- /ko --> -</div>
+                    <div class="roomnum">- <!-- ko text: $data.roomId == 0 ? 1 : $data.roomId + 1 --><!-- /ko --> -</div>
                 </div>
             </div>
             <div class="room_right">
