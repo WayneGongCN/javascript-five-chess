@@ -102,7 +102,7 @@ module.exports = class FiveChess {
                 index: len
             });
             players.push(newPlayer);
-            
+
             socket.emit('login', {
                 playerList: players.map(x => x.getUserInfo()),
                 roomList: this.roomList.map(x => x.getRoomInfo())
@@ -123,12 +123,15 @@ module.exports = class FiveChess {
             player.joinRoom(room, post);
 
             socket.emit('joinRoom', {
+                sid: sid,
                 post: post,
                 room: room.getRoomInfo()
             });
 
             io.sockets.emit('join', {
-                room: room.getRoomInfo()
+                room: room.getRoomInfo(),
+                sid: player.sid,
+                post: post
             })
         }
     }
@@ -138,8 +141,8 @@ module.exports = class FiveChess {
         let player = this.getPlayerBySid(sid);
 
         io.sockets.emit('leaveRoom', {
-            player: player.sid,
-            room: player.room.roomId
+            playerSid: player.sid,
+            roomId: player.room.roomId
         });
 
         player.leaveRoom();

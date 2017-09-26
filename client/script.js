@@ -59,14 +59,18 @@ ViewModel.prototype.login = function () {
 
 ViewModel.prototype.onLogin = function (data, socket) {
     console.log('onLogin', data);
-    let array = data.roomList.map(item => {
+
+    let playerList = data.playerList.map(x => {
+        return new Player(x);
+    });
+    this.playerList(playerList);
+
+    let roomList = data.roomList.map(item => {
         return new Room(item);
     });
-    let player = new Player(data.playerList.filter(x => x.sid === socket.id)[0]);
+    this.roomList(roomList);
 
-    this.roomList(array);
-    this.player(player);
-    this.playerList()[player.index] = player;
+    this.player(this.getUserBySid(socket.id));
     this.isLogin(true);
 }
 
@@ -80,13 +84,12 @@ ViewModel.prototype.joinRoom = function (room, post) {
 
 ViewModel.prototype.onJoinRoom = function (data, socket) {
     console.log('onJoinRoom', data)
-    let sid = socket.id;
-    let roomId = data.room.roomId;
     let post = data.post;
+    let room = this.getRoomByRoomId(data.room.roomId);
+    let player = this.getUserBySid(data.sid);
 
-    let room = this.getRoomByRoomId(roomId);
-    this.player().joinRoom(data.post, room)
-    this.hasRoom(true);
+    if(this.player().sid === sid)this.hasRoom(true);
+    player.joinRoom(data.post, room);
 }
 
 //离开房间
@@ -96,8 +99,9 @@ ViewModel.prototype.leaveRoom = function (data, socket) {
 
 ViewModel.prototype.onLeaveRoom = function (data, socket) {
     console.log(data);
-    this.player().leaveRoom()
-    this.hasRoom(false)
+    let player = this.getUserBySid(data.playerSid);
+    if (this.player() === player) this.hasRoom(false);
+    player.leaveRoom()
 }
 
 //准备
@@ -114,10 +118,24 @@ ViewModel.prototype.onReady = function (data, socket) {
 //加入
 ViewModel.prototype.onJoin = function (data, socket) {
     console.log('join', data);
+    if ('room' in data) {
+        let player = this.getUserBySid(data.sid);
+        let room = this.getRoomByRoomId(data.room.roomId);
+        player.joinRoom(data.post, room);
+    } else if ('player' in data) {
+        if (data.player.sid === this.player().sid) return;
+
+        let player = new Player(data.player);
+        this.playerList.splice(player.index, 1, player)
+    }
 }
 
 ViewModel.prototype.getRoomByRoomId = function (roomId) {
     return this.roomList()[roomId];
+}
+
+ViewModel.prototype.getUserBySid = function (sid) {
+    return this.playerList().filter(x => x.sid === sid)[0];
 }
 
 ko.applyBindings(new ViewModel());

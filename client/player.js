@@ -9,19 +9,19 @@ class Player {
     }
 
     leaveRoom() {
-        this.room()[this.post()] = null;
+        this.room().players.splice(this.post(), 1, null);
         this.room(null);
         this.post(null);
         this.status(0);
     }
 
-    joinRoom(post,room) {
+    joinRoom(post, room) {
         this.post(post);
         this.room(room);
-        room.players()[post] = this;
+        room.players.splice(post, 1, this);
     }
 
-    ready(){
+    ready() {
         this.status(2);
     }
 }

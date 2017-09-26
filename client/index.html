@@ -55,7 +55,7 @@
                     <div class="player2"></div>
                     <div class="players" data-bind="foreach: players">
                         <div class="player no" data-bind="click: $root.joinRoom.bind($root,$parent,$index())">
-                            <!-- ko if: $data != null -->
+                            <!-- ko if: $data -->
                                 <i data-bind="text: nickName()"></i>
                             <!-- /ko -->
                         </div>
@@ -65,8 +65,10 @@
                 </div>
             </div>
             <div class="room_right">
-                <div id="list-box" class="list">
-                    <li id="user-4O3pjrDHB95DTFS2AAAE"><span>无状态</span>123</li>
+                <div class="list" data-bind="foreach: playerList">
+                    <!-- ko if: $data -->
+                        <li data-bind="text: $data.nickName()"></li>
+                    <!-- /ko -->
                 </div>
                 <div class="message">
                     <div id="msg-content" class="content"></div>
